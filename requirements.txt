@@ -1,5 +1,6 @@
 # Redes Neuronales — Proyecto Final
 # Detección de Muelas del Juicio (DENTEX / Exp_G7)
+# Versiones fijadas para despliegue reproducible en Streamlit Cloud (Python 3.10)
 
 # Deep learning (CPU — Streamlit Cloud no tiene GPU)
 torch==2.3.0
@@ -7,6 +8,9 @@ torchvision==0.18.0
 
 # YOLOv8
 ultralytics==8.2.18
+
+# SAHI — Slicing Aided Hyper Inference (tiling para imágenes grandes)
+sahi==0.11.15
 
 # App web
 streamlit==1.35.0
@@ -21,8 +25,8 @@ pandas==2.2.2
 scikit-learn==1.4.2
 matplotlib==3.9.0
 
-# Descarga del modelo desde Drive (si supera límite del repo)
+# Descarga del modelo desde Drive (fallback si supera límite del repo)
 requests==2.31.0
 
-# Dataset (solo para dev/notebook, ignorado en prod)
+# Dataset / notebooks (solo dev)
 huggingface_hub==0.23.0
