@@ -1,25 +1,20 @@
 # Deep learning
-torch==2.3.0
-torchvision==0.18.0
+torch>=2.9.0
+torchvision>=0.20.0
 
 # YOLOv8
-ultralytics==8.2.18
+ultralytics>=8.2.18
 
 # SAHI — Slicing Aided Hyper Inference
 sahi==0.11.15
 
 # App web
-streamlit==1.35.0
+streamlit>=1.35.0
 
-opencv-python-headless==4.9.0.80
-Pillow==10.3.0
+opencv-python-headless>=4.9.0.80
+Pillow>=10.3.0
 
-numpy==1.26.4
-pandas==2.2.2
-scikit-learn==1.4.2
-matplotlib==3.9.0
+numpy>=1.26.4
+pandas>=2.2.2
 
-requests==2.31.0
-
-# Dataset / notebooks (solo dev)
-huggingface_hub==0.23.0
+requests>=2.31.0
