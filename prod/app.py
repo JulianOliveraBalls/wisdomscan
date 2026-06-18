@@ -154,9 +154,9 @@ with st.sidebar:
     if logo_b64:
         st.markdown(
             f'<img src="data:image/png;base64,{logo_b64}" '
-            f'style="width:100%; max-width:200px; margin-bottom:16px; display:block;">',
+            f'style="width:100%; max-width:200px; margin: 0 auto 16px auto; display:block;">',
             unsafe_allow_html=True,
-        )
+)
 
     st.markdown("## ⚙️ Parámetros")
     st.markdown('<div class="accent-bar"></div>', unsafe_allow_html=True)
@@ -194,7 +194,7 @@ with st.sidebar:
         st.info("CLAHE activo", icon="🔆")
 
     st.markdown("---")
-    st.markdown("### 📊 Modelo")
+    st.markdown("### Modelo")
     st.markdown("""
 | Campo | Valor |
 |-------|-------|
@@ -209,18 +209,8 @@ with st.sidebar:
 """)
 
     st.markdown("---")
-    st.markdown("### 🧬 Pipeline")
-    st.markdown("""
-```
-G7 (two-class, 7857 imgs)
-  └─ G8 (fine-tune impacted)
-       └─ G8b (fine-tune ~900px)
-```
-Entrenado en Google Colab · Tesla T4
-""")
-
-    st.markdown("---")
-    st.caption("Redes Neuronales · UTN FRM\nDocente: Ing. Pablo Marinozi")
+    st.caption("Redes Neuronales · UTN FRM")
+    st.caption("Docente: Ing. Pablo Marinozi")
 
 
 # ── Modelo ────────────────────────────────────────────────────────────────────
@@ -232,30 +222,22 @@ sahi_model = load_sahi_model()
 # ── Header ────────────────────────────────────────────────────────────────────
 
 col_logo, col_title = st.columns([1, 7])
-with col_logo:
-    logo_b64 = get_logo_b64("src/dentex_logo.png")
-    if logo_b64:
-        st.markdown(
-            f'<img src="data:image/png;base64,{logo_b64}" '
-            f'style="width:80px; margin-top:6px;">',
-            unsafe_allow_html=True,
-        )
+
 with col_title:
     st.markdown("""
-<h1 style='margin-bottom:2px; color:#1a1a2e;'>WisdomScan</h1>
-<p style='color:#888; font-size:1.05rem; margin-top:0;'>
-Detección automática de muelas del juicio impactadas · YOLOv8m
-</p>
-<div style='height:3px; background:linear-gradient(90deg,#ff6b2b,#ffaa80);
-border-radius:2px; margin-top:6px;'></div>
-""", unsafe_allow_html=True)
+    <h1 style='margin-bottom:2px; color:#1a1a2e;'>WisdomScan</h1>
+    <p style='color:#888; font-size:1.05rem; margin-top:0;'>
+    Detección automática de muelas del juicio impactadas · YOLOv8m
+    </p>
+    <div style='height:3px; background:linear-gradient(90deg,#ff6b2b,#ffaa80);
+    border-radius:2px; margin-top:6px;'></div>
+    """, unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
-
 # ── Upload ────────────────────────────────────────────────────────────────────
 
 uploaded_file = st.file_uploader(
-    "📁 Subí una radiografía panorámica (OPG) — JPG, PNG, WEBP",
+    "",
     type=["jpg", "jpeg", "png", "webp"],
     help="Resolución recomendada: ≥ 800px de ancho.",
 )
@@ -296,7 +278,7 @@ summary = summarize_detections(detections)
 
 # ── Métricas ──────────────────────────────────────────────────────────────────
 
-st.markdown("### 🔍 Resultado del análisis")
+st.markdown("### Resultado del análisis")
 
 col1, col2, col3 = st.columns(3)
 col1.metric("🦷 Muelas impactadas", summary["impacted"])
@@ -320,10 +302,10 @@ with col_res:
 # ── Tabla ─────────────────────────────────────────────────────────────────────
 
 if summary["impacted"] > 0:
-    st.markdown("### 📋 Detalle de detecciones")
+    st.markdown("###Detalle de detecciones")
     rows = []
     for i, det in enumerate(summary["details"], 1):
-        if det.cls_name != "impacted" and det.cls_id != 0:
+        if det.cls_name != "impacted" and det.cls_id != 1:
             continue
         w = det.x2 - det.x1
         h = det.y2 - det.y1
@@ -353,7 +335,7 @@ st.markdown("---")
 col_dl, col_info = st.columns([2, 5])
 with col_dl:
     st.download_button(
-        label="⬇️ Descargar resultado",
+        label="Descargar resultado",
         data=pil_to_bytes(img_result_pil, fmt="PNG"),
         file_name="wisdomscan_resultado.png",
         mime="image/png",

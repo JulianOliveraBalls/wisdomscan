@@ -55,7 +55,7 @@ SAHI_SLICE_W    = 640
 SAHI_OVERLAP    = 0.2   # 20% solapamiento entre tiles
 
 MODEL_GDRIVE_URL    = "https://drive.google.com/uc?export=download&id=TU_FILE_ID_AQUI"
-MODEL_LOCAL_PATH    = Path("prod/model/best.pt")
+MODEL_LOCAL_PATH    = Path("dev/model/best.pt")
 MODEL_FALLBACK_PATH = Path("model/best.pt")
 
 
@@ -295,8 +295,8 @@ def pil_to_bytes(pil_img: Image.Image, fmt: str = "PNG") -> bytes:
 
 
 def summarize_detections(detections: list[Detection]) -> dict:
-    erupted  = [d for d in detections if d.cls_id == 0]
-    impacted = [d for d in detections if d.cls_id == 1]
+    impacted = [d for d in detections if d.cls_name == "impacted"]
+    erupted  = [d for d in detections if d.cls_name == "erupted"]
     return {
         "total":    len(detections),
         "erupted":  len(erupted),
