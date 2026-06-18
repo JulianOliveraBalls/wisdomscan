@@ -29,9 +29,11 @@ from utils import (
 
 # ── Helper logo ───────────────────────────────────────────────────────────────
 def get_logo_b64(path: str) -> str | None:
-    p = Path(path)
+    # Buscar relativo al archivo app.py, no al cwd
+    base = Path(__file__).parent.parent
+    p = base / path
     if not p.exists():
-        p = Path(__file__).parent.parent / "src" / "dentex_logo.png"
+        p = base / "src" / "dentex_logo.png"
     if p.exists():
         return base64.b64encode(p.read_bytes()).decode()
     return None
