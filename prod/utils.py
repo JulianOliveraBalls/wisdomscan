@@ -51,8 +51,8 @@ SAHI_SLICE_H = 640
 SAHI_SLICE_W = 640
 SAHI_OVERLAP = 0.2
 
-MODEL_LOCAL_PATH    = Path("dev/model/best.pt")
-MODEL_FALLBACK_PATH = Path("model/best.pt")
+MODEL_LOCAL_PATH    = Path(__file__).parent / "model" / "best.pt"
+MODEL_FALLBACK_PATH = Path("dev/model/best.pt")
 
 
 # ── Carga del modelo ─────────────────────────────────────────────────────────
