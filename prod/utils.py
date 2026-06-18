@@ -42,7 +42,7 @@ COLORS = {
     0: (34, 197, 94),   # verde — impacted
 }
 
-CONF_DEFAULT = 0.25
+CONF_DEFAULT = 0.15
 IOU_DEFAULT  = 0.45
 IMGSZ        = 640
 

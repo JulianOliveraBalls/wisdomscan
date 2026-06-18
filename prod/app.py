@@ -167,7 +167,7 @@ with st.sidebar:
         "Umbral de confianza",
         min_value=0.10, max_value=0.90,
         value=CONF_DEFAULT, step=0.05,
-        help="Confianza mínima para reportar una detección. Default: 0.25",
+        help="Confianza mínima para reportar una detección. Default: 0.15",
     )
     iou_thresh = st.slider(
         "Umbral IoU (NMS)",
