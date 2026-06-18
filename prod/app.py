@@ -239,9 +239,10 @@ st.markdown("<br>", unsafe_allow_html=True)
 # ── Upload ────────────────────────────────────────────────────────────────────
 
 uploaded_file = st.file_uploader(
-    "",
+    "Radiografía panorámica",
     type=["jpg", "jpeg", "png", "webp"],
     help="Resolución recomendada: ≥ 800px de ancho.",
+    label_visibility="collapsed",
 )
 
 if uploaded_file is None:
