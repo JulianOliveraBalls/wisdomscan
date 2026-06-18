@@ -28,7 +28,6 @@ from typing import NamedTuple
 
 import cv2
 import numpy as np
-import requests
 import streamlit as st
 from PIL import Image
 from sahi import AutoDetectionModel
@@ -37,34 +36,31 @@ from ultralytics import YOLO
 
 # ── Constantes ───────────────────────────────────────────────────────────────
 
-# Si usás G8:
 CLASSES = {0: "impacted"}
 
 COLORS = {
-    0: (34, 197, 94),   # verde — erupted
-    1: (0, 80, 220),    # azul  — impacted
+    0: (34, 197, 94),   # verde — impacted
 }
 
-CONF_DEFAULT    = 0.25
-IOU_DEFAULT     = 0.45
-IMGSZ           = 640
+CONF_DEFAULT = 0.25
+IOU_DEFAULT  = 0.45
+IMGSZ        = 640
 
 # Parámetros SAHI — tile de 640×640 con 20% de overlap
-SAHI_SLICE_H    = 640
-SAHI_SLICE_W    = 640
-SAHI_OVERLAP    = 0.2   # 20% solapamiento entre tiles
+SAHI_SLICE_H = 640
+SAHI_SLICE_W = 640
+SAHI_OVERLAP = 0.2
 
-MODEL_GDRIVE_URL    = "https://drive.google.com/uc?export=download&id=TU_FILE_ID_AQUI"
 MODEL_LOCAL_PATH    = Path("dev/model/best.pt")
 MODEL_FALLBACK_PATH = Path("model/best.pt")
 
 
 # ── Carga del modelo ─────────────────────────────────────────────────────────
 
-@st.cache_resource(show_spinner="Cargando modelo YOLOv8 (Exp_G7)…")
+@st.cache_resource(show_spinner="Cargando modelo YOLOv8 (Exp_G8b)…")
 def load_model(model_path: str | None = None) -> YOLO:
     """
-    Carga el modelo YOLOv8 desde disco o lo descarga si no existe.
+    Carga el modelo YOLOv8 desde disco.
     Cacheado con @st.cache_resource — se ejecuta una sola vez por sesión.
     """
     if model_path:
@@ -76,8 +72,10 @@ def load_model(model_path: str | None = None) -> YOLO:
         if candidate.exists():
             return YOLO(str(candidate))
 
-    _download_model(MODEL_LOCAL_PATH)
-    return YOLO(str(MODEL_LOCAL_PATH))
+    raise FileNotFoundError(
+        "No se encontró best.pt. "
+        "Verificar que dev/model/best.pt esté commiteado en el repo."
+    )
 
 
 @st.cache_resource(show_spinner="Cargando modelo SAHI…")
@@ -97,8 +95,10 @@ def load_sahi_model(model_path: str | None = None) -> AutoDetectionModel:
                 break
 
     if pt is None:
-        _download_model(MODEL_LOCAL_PATH)
-        pt = MODEL_LOCAL_PATH
+        raise FileNotFoundError(
+            "No se encontró best.pt. "
+            "Verificar que dev/model/best.pt esté commiteado en el repo."
+        )
 
     return AutoDetectionModel.from_pretrained(
         model_type="yolov8",
@@ -108,39 +108,20 @@ def load_sahi_model(model_path: str | None = None) -> AutoDetectionModel:
     )
 
 
-def _download_model(dest: Path) -> None:
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    with st.spinner("Descargando pesos del modelo desde Drive…"):
-        r = requests.get(MODEL_GDRIVE_URL, stream=True, timeout=120)
-        r.raise_for_status()
-        with open(dest, "wb") as f:
-            for chunk in r.iter_content(chunk_size=8192):
-                f.write(chunk)
-
-
 # ── Preprocesamiento ─────────────────────────────────────────────────────────
 
 def preprocess_image(uploaded_file, enhance_contrast: bool = False) -> np.ndarray:
+    """
+    Convierte el archivo subido a BGR numpy.
+    G8b fue entrenado con imágenes ~900px — YOLO hace el resize a 640px internamente.
+    No se aplica upscale manual.
+    """
     pil_img = Image.open(uploaded_file).convert("RGB")
-    
-    # Upscale al tamaño del dataset DENTEX si la imagen es más chica
-    TARGET_W = 2800
-    TARGET_H = 1316
-    w, h = pil_img.size
-    
-    if w < TARGET_W or h < TARGET_H:
-        # Escalar manteniendo aspect ratio hasta que entre en el target
-        scale = min(TARGET_W / w, TARGET_H / h)
-        new_w = int(w * scale)
-        new_h = int(h * scale)
-        pil_img = pil_img.resize((new_w, new_h), Image.LANCZOS)
-    
     bgr = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
-    
     if enhance_contrast:
         bgr = _apply_clahe(bgr)
-    
     return bgr
+
 
 def _apply_clahe(img_bgr: np.ndarray) -> np.ndarray:
     """
@@ -176,7 +157,7 @@ def run_inference(
 ) -> list[Detection]:
     """
     Inferencia estándar sobre la imagen completa (sin tiling).
-    Parámetros idénticos al notebook: conf=0.25, imgsz=640.
+    Parámetros idénticos al entrenamiento: conf=0.25, imgsz=640.
     """
     results = model.predict(
         source=img_bgr,
@@ -211,21 +192,10 @@ def run_inference_sahi(
 
     Mejora la detección en radiografías panorámicas grandes donde las muelas
     superiores quedan muy pequeñas relativas al frame completo.
-
-    Args:
-        sahi_model: modelo cargado con load_sahi_model()
-        img_bgr:    imagen BGR numpy en resolución original
-        conf:       umbral de confianza
-        iou:        umbral NMS para el ensamblado de tiles
-
-    Returns:
-        Lista de Detection con coordenadas en el espacio de la imagen original.
     """
-    # SAHI trabaja con PIL RGB
     img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
     pil_img = Image.fromarray(img_rgb)
 
-    # Actualizar umbral de confianza del modelo SAHI
     sahi_model.confidence_threshold = conf
 
     result = get_sliced_prediction(
@@ -235,7 +205,7 @@ def run_inference_sahi(
         slice_width=SAHI_SLICE_W,
         overlap_height_ratio=SAHI_OVERLAP,
         overlap_width_ratio=SAHI_OVERLAP,
-        postprocess_type="NMM",         # Non-Maximum Merging — más suave que NMS duro
+        postprocess_type="NMM",
         postprocess_match_threshold=iou,
         verbose=0,
     )

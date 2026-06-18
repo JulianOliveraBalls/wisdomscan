@@ -280,10 +280,9 @@ summary = summarize_detections(detections)
 
 st.markdown("### Resultado del análisis")
 
-col1, col2, col3 = st.columns(3)
+col1, col2 = st.columns(2)
 col1.metric("🦷 Muelas impactadas", summary["impacted"])
 col2.metric("📐 Modo", modo)
-col3.metric("⚙️ Confianza", f"{conf_thresh:.0%}")
 
 st.markdown("---")
 
@@ -340,11 +339,4 @@ with col_dl:
         file_name="wisdomscan_resultado.png",
         mime="image/png",
         use_container_width=True,
-    )
-with col_info:
-    st.caption(
-        f"YOLOv8m · Exp_G8b · "
-        f"conf={conf_thresh:.2f} · iou={iou_thresh:.2f} · "
-        f"{'SAHI' if use_sahi else 'Estándar'} · "
-        f"{'CLAHE' if enhance_contrast else 'sin CLAHE'}"
     )
