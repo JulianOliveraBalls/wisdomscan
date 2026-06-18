@@ -304,7 +304,7 @@ with col_res:
 # ── Tabla ─────────────────────────────────────────────────────────────────────
 
 if summary["impacted"] > 0:
-    st.markdown("###Detalle de detecciones")
+    st.markdown("Detalle de detecciones")
     rows = []
     for i, det in enumerate(summary["details"], 1):
         if det.cls_name != "impacted" and det.cls_id != 1:
