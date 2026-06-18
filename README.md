@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="src/dentex_logo.png" width="180" alt="WisdomScan logo">
+</p>
+
 # WisdomScan
 
 Detección automática de muelas del juicio impactadas en radiografías panorámicas dentales, usando YOLOv8m fine-tuneado sobre el dataset DENTEX MICCAI 2023.
