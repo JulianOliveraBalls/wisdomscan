@@ -1,118 +1,137 @@
-# Detección de Muelas del Juicio en Radiografías Panorámicas
+# WisdomScan
 
-Proyecto final de la materia **Redes Neuronales** — Universidad Tecnológica Nacional.  
-Docente a cargo: **Ing. Pablo Marinozi**
+Detección automática de muelas del juicio impactadas en radiografías panorámicas dentales, usando YOLOv8m fine-tuneado sobre el dataset DENTEX MICCAI 2023.
+
+**🔗 App desplegada:** https://wisdomscan.streamlit.app/
 
 ---
 
 ## Descripción
 
-Este proyecto implementa un sistema de detección automática de muelas del juicio (terceros molares) en radiografías panorámicas dentales, clasificándolas en dos estados clínicos:
+Las muelas del juicio impactadas (terceros molares retenidos) son una de las patologías dentales más frecuentes y pueden causar dolor, infección y daño a dientes adyacentes si no se detectan a tiempo. El diagnóstico tradicional requiere un especialista que interprete radiografías panorámicas manualmente.
 
-- **erupted** — erupcionada, posición normal
-- **impacted** — retenida, requiere intervención quirúrgica
+WisdomScan permite subir una radiografía panorámica (OPG) y obtener en segundos la localización de las muelas impactadas con bounding boxes y nivel de confianza, sin necesidad de software especializado.
 
-La tarea es detección de objetos (bounding box + clase). El modelo localiza cada muela del juicio presente en la radiografía y la clasifica. Una imagen puede contener hasta 4 muelas en distintos estados simultáneamente.
+### Modelo
 
-La aplicación final (Streamlit) permite al odontólogo subir una radiografía y obtener las detecciones superpuestas sobre la imagen original.
+El modelo de producción: YOLOv8m fine-tuneado en una cadena de 3 etapas sobre los datasets DENTEX y ExAn-MTM, con imágenes downscaleadas a ~900px para igualar la escala de imágenes reales de entrada.
+
+| Métrica | Valor |
+|---------|-------|
+| mAP50 (test) | **0.992** |
+| Precision | 0.980 |
+| Recall | 0.999 |
+| F1 | 0.989 |
+
+### Funcionalidades
+
+- Detección de muelas impactadas con bounding boxes sobre la radiografía
+- Tabla de detecciones con confianza, posición (superior/inferior) y dimensiones
+- Modo SAHI (tiling) para radiografías de alta resolución
+- CLAHE para normalización de contraste en imágenes oscuras
+- Descarga del resultado anotado
 
 ---
 
-## Dataset
+## Integrantes
 
-El proyecto utiliza el dataset **DENTEX** (Dental Enumeration and Diagnosis on Panoramic X-rays), presentado en MICCAI 2023.
+| Nombre |
+|--------|
+| Anselmi, Matías |
+| De Coninck, Ramiro |
+| Eraso, Leandro |
+| Mazurán, Clara |
+| Olivera Balls, Julián |
 
-- Paper: [arXiv:2305.19112](https://arxiv.org/abs/2305.19112)
-- Dataset: [Hugging Face — ibrahimhamamci/DENTEX](https://huggingface.co/datasets/ibrahimhamamci/DENTEX)
-- Licencia: CC-BY-NC-SA 4.0 (no comercial, con atribución)
-
-Ver `data/README.md` para instrucciones de descarga.
+**Materia:** Redes Neuronales — UTN Facultad Regional Mendoza  
+**Docente:** Ing. Pablo Marinozi
 
 ---
 
-## Arquitectura del modelo
+## Datasets
 
-Se utiliza **YOLOv8s** con fine-tuning desde pesos preentrenados en COCO.  
-El baseline del paper (HierarchicalDet con DiffusionDet) fue evaluado y descartado por complejidad de implementación — ver `dev/02_entrenamiento.ipynb` para el análisis comparativo.
+| Dataset | Fuente | Licencia |
+|---------|--------|----------|
+| DENTEX MICCAI 2023 | [HuggingFace — ibrahimhamamci/DENTEX](https://huggingface.co/datasets/ibrahimhamamci/DENTEX) | CC BY 4.0 |
+| ExAn-MTM | [Kaggle](https://www.kaggle.com/datasets/ikyd26/expert-annotated-mandibular-third-molar-dataset) + [Figshare](https://doi.org/10.6084/m9.figshare.21621705) | CC BY 4.0 |
 
 ---
 
 ## Estructura del repositorio
 
 ```
-.
+dentex-wisdom-teeth/
 ├── data/
-│   ├── README.md          # Instrucciones de descarga del dataset
-│   ├── download.py        # Script de descarga automática desde HuggingFace
-│   ├── train.csv          # Split de entrenamiento (rutas + etiquetas)
-│   ├── val.csv            # Split de validación
-│   └── test.csv           # Split de test
+│   ├── 01_dataset_preparation.ipynb
+│   ├── test.csv
+│   ├── train.csv
+│   └── val.csv
 ├── dev/
-│   ├── 01_dataset_exploration.ipynb   # Entrega 1: EDA y preparación
-│   └── 02_dataset_pytorch.ipynb       # Entrega 2: Dataset PyTorch + augmentation
+│   ├── 02_dataset_pytorch.ipynb
+│   └── 03_experiments.ipynb
 ├── prod/
-│   └── app.py             # Aplicación Streamlit (entrega final)
-├── requirements.txt
-└── README.md
+│   ├── model/
+│   │   └── best.pt           # pesos del modelo de producción
+│   ├── app.py                # interfaz Streamlit
+│   └── utils.py              # funciones auxiliares
+├── src/
+│   └── dentex_logo.png
+├── .gitignore
+├── .python-version           # Python 3.11
+├── packages.txt              # dependencias del sistema (Streamlit Cloud)
+├── README.md
+└── requirements.txt
 ```
 
 ---
 
-## Cómo ejecutar
+## Correr localmente
 
-### Opción A — Google Colab (recomendado)
+### Requisitos
 
-1. Abrir el notebook en Colab haciendo clic en el badge de cada notebook
-2. Ejecutar todas las celdas — la descarga del dataset se hace automáticamente desde HuggingFace
-3. No se necesita Drive ni configuración adicional
+- Python 3.11
+- Git
 
-### Opción B — Local
+### Pasos
 
 ```bash
 # 1. Clonar el repositorio
-git clone https://github.com/<tu-usuario>/dentex-wisdom-teeth.git
+git clone https://github.com/JulianOliveraBalls/dentex-wisdom-teeth.git
 cd dentex-wisdom-teeth
 
-# 2. Crear entorno virtual e instalar dependencias
+# 2. Crear entorno virtual
 python -m venv venv
-source venv/bin/activate        # En Windows: venv\Scripts\activate
+
+# Windows
+venv\Scripts\activate
+# Linux / macOS
+source venv/bin/activate
+
+# 3. Instalar dependencias
 pip install -r requirements.txt
 
-# 3. Descargar el dataset
-python data/download.py
-
-# 4. Abrir los notebooks
-jupyter notebook dev/
+# 4. Correr la app
+streamlit run prod/app.py
 ```
 
-El script `data/download.py` descarga automáticamente el dataset desde HuggingFace en la carpeta `data/raw/`. No se requieren pasos manuales.
+La app queda disponible en http://localhost:8501
+
+### Requisitos del sistema (Linux)
+
+Si corrés en Linux y cv2 falla, instalá:
+
+```bash
+sudo apt-get install libgl1
+```
 
 ---
 
-## Reproducibilidad
+## Reproducir los experimentos
 
-Todos los experimentos usan `seed=42`. El particionado train/val/test está fijado en los archivos `data/train.csv`, `data/val.csv` y `data/test.csv`, que se versionan en el repositorio. Clonar el repo y correr el script de descarga es suficiente para reproducir exactamente los mismos resultados.
+Para reproducir el pipeline completo desde cero, correr los notebooks en orden en Google Colab:
 
----
-
-## Resultados
-
-*(Se completará en entregas posteriores)*
-
-| Métrica | Valor |
-|---------|-------|
-| mAP@50  | — |
-| mAP@50-95 | — |
-| AR | — |
-
----
-
-## Requisitos
-
-Ver `requirements.txt`. Principales dependencias:
-
-- `ultralytics` — YOLOv8
-- `torch` / `torchvision`
-- `huggingface_hub` — descarga del dataset
-- `scikit-learn` — split estratificado
-- `streamlit` — aplicación web (entrega final)
+```
+data/01_dataset_preparation.ipynb   — descarga y prepara los datasets
+dev/02_dataset_pytorch.ipynb        — Dataset, DataLoaders y augmentation
+dev/03_experiments.ipynb            — entrenamientos y evaluación
+```
