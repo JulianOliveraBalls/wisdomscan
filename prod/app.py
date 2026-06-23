@@ -180,10 +180,16 @@ st.markdown("<br>", unsafe_allow_html=True)
 
 # ── Upload ────────────────────────────────────────────────────────────────────
 
+st.info(
+    "Resolución mínima requerida: **600px de ancho**. "
+    "Para mejores resultados se recomienda ≥ 800px.",
+    icon="ℹ️",
+)
+
 uploaded_file = st.file_uploader(
     "Radiografía panorámica",
     type=["jpg", "jpeg", "png", "webp"],
-    help="Resolución recomendada: ≥ 800px de ancho.",
+    accept_multiple_files=False,
     label_visibility="collapsed",
 )
 
@@ -208,13 +214,12 @@ _img_check = _PILImage.open(uploaded_file)
 _w, _h = _img_check.size
 uploaded_file.seek(0)
 
-if _w < 500:
-    st.warning(
-        f"La imagen es muy pequeña ({_w}×{_h}px). "
-        "El modelo fue entrenado con radiografías de ~900px de ancho — "
-        "los resultados pueden ser poco confiables. "
-        "Se recomienda una resolución mínima de 800px de ancho.",
-        icon="⚠️",
+if _w < 600:
+    st.error(
+        f"❌ Imagen rechazada ({_w}×{_h}px). "
+        "La resolución mínima es 600px de ancho. "
+        "Subí una radiografía panorámica de mayor resolución.",
+        icon="🚫",
     )
     st.stop()
 elif _w < 800:
