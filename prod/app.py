@@ -4,32 +4,26 @@ app.py — Interfaz Streamlit para detección de muelas del juicio (Exp_G8b).
 
 import base64
 from pathlib import Path
-import base64
-from pathlib import Path
-import streamlit as st
 
 import streamlit as st
+from PIL import Image as _PILImage
 
 from utils import (
     CONF_DEFAULT,
     IOU_DEFAULT,
     bgr_to_pil,
     load_model,
-    load_sahi_model,
     pil_to_bytes,
     postprocess_results,
     preprocess_image,
     run_inference,
-    run_inference_sahi,
     summarize_detections,
 )
 
-# ── Página ────────────────────────────────────────────────────────────────────
-
 
 # ── Helper logo ───────────────────────────────────────────────────────────────
+
 def get_logo_b64(path: str) -> str | None:
-    # Buscar relativo al archivo app.py, no al cwd
     base = Path(__file__).parent.parent
     p = base / path
     if not p.exists():
@@ -38,7 +32,9 @@ def get_logo_b64(path: str) -> str | None:
         return base64.b64encode(p.read_bytes()).decode()
     return None
 
+
 # ── Página ────────────────────────────────────────────────────────────────────
+
 logo_b64 = get_logo_b64("src/dentex_logo.png")
 st.set_page_config(
     page_title="WisdomScan — Detección de Muelas del Juicio",
@@ -49,7 +45,6 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-/* Fondo blanco */
 [data-testid="stAppViewContainer"] {
     background-color: #ffffff;
     color: #1a1a2e;
@@ -61,8 +56,6 @@ st.markdown("""
 [data-testid="stSidebar"] * {
     color: #1a1a2e !important;
 }
-
-/* Métricas */
 [data-testid="metric-container"] {
     background-color: #fff8f5;
     border: 1.5px solid #ff6b2b;
@@ -78,8 +71,6 @@ st.markdown("""
     color: #555 !important;
     font-weight: 500 !important;
 }
-
-/* Botones */
 .stButton > button, .stDownloadButton > button {
     background-color: #ff6b2b;
     color: #ffffff;
@@ -91,43 +82,24 @@ st.markdown("""
 .stButton > button:hover, .stDownloadButton > button:hover {
     background-color: #e55a1f;
 }
-
-/* Toggle */
-[data-testid="stToggle"] { accent-color: #ff6b2b; }
-
-/* Tabla */
 [data-testid="stDataFrame"] {
     border: 1.5px solid #ffe0d0;
     border-radius: 8px;
 }
-
-/* Headers */
 h1, h2, h3, h4 { color: #1a1a2e !important; }
-
-/* Divider */
 hr { border-color: #ffe0d0 !important; border-width: 1.5px !important; }
-
-/* Info */
 [data-testid="stInfo"] {
     background-color: #fff8f5;
     border-left: 4px solid #ff6b2b;
     color: #1a1a2e;
 }
-[data-testid="stWarning"] {
-    border-left: 4px solid #ff6b2b;
-}
-
-/* File uploader */
+[data-testid="stWarning"] { border-left: 4px solid #ff6b2b; }
 [data-testid="stFileUploader"] {
     background-color: #fff8f5;
     border: 2px dashed #ff6b2b;
     border-radius: 10px;
 }
-
-/* Caption */
 .stCaption { color: #999 !important; }
-
-/* Accent line bajo el header */
 .accent-bar {
     height: 3px;
     background: linear-gradient(90deg, #ff6b2b, #ffaa80);
@@ -136,17 +108,6 @@ hr { border-color: #ffe0d0 !important; border-width: 1.5px !important; }
 }
 </style>
 """, unsafe_allow_html=True)
-
-
-# ── Helper logo ───────────────────────────────────────────────────────────────
-
-def get_logo_b64(path: str) -> str | None:
-    p = Path(path)
-    if not p.exists():
-        p = Path(__file__).parent.parent / "src" / "dentex_logo.png"
-    if p.exists():
-        return base64.b64encode(p.read_bytes()).decode()
-    return None
 
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
@@ -158,7 +119,7 @@ with st.sidebar:
             f'<img src="data:image/png;base64,{logo_b64}" '
             f'style="width:100%; max-width:200px; margin: 0 auto 16px auto; display:block;">',
             unsafe_allow_html=True,
-)
+        )
 
     st.markdown("## ⚙️ Parámetros")
     st.markdown('<div class="accent-bar"></div>', unsafe_allow_html=True)
@@ -175,25 +136,6 @@ with st.sidebar:
         value=IOU_DEFAULT, step=0.05,
         help="Supresión no máxima — elimina detecciones solapadas.",
     )
-
-    st.markdown("---")
-
-    use_sahi = st.toggle(
-        "🔲 SAHI — tiling",
-        value=False,
-        help="Divide la imagen en tiles 640×640 solapados. Mejora detección en "
-             "radiografías grandes. ~3-5s extra.",
-    )
-    enhance_contrast = st.toggle(
-        "🔆 CLAHE — normalizar contraste",
-        value=False,
-        help="Ecualización adaptativa de histograma. Útil en radiografías oscuras.",
-    )
-
-    if use_sahi:
-        st.info("SAHI activo", icon="🔲")
-    if enhance_contrast:
-        st.info("CLAHE activo", icon="🔆")
 
     st.markdown("---")
     st.markdown("### Modelo")
@@ -217,14 +159,12 @@ with st.sidebar:
 
 # ── Modelo ────────────────────────────────────────────────────────────────────
 
-model      = load_model()
-sahi_model = load_sahi_model()
+model = load_model()
 
 
 # ── Header ────────────────────────────────────────────────────────────────────
 
-col_logo, col_title = st.columns([1, 7])
-
+_, col_title = st.columns([1, 7])
 with col_title:
     st.markdown("""
     <h1 style='margin-bottom:2px; color:#1a1a2e;'>WisdomScan</h1>
@@ -236,6 +176,8 @@ with col_title:
     """, unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
+
+
 # ── Upload ────────────────────────────────────────────────────────────────────
 
 uploaded_file = st.file_uploader(
@@ -260,21 +202,36 @@ if uploaded_file is None:
     st.stop()
 
 
+# ── Validación de resolución ──────────────────────────────────────────────────
+
+_img_check = _PILImage.open(uploaded_file)
+_w, _h = _img_check.size
+uploaded_file.seek(0)
+
+if _w < 500:
+    st.warning(
+        f"La imagen es muy pequeña ({_w}×{_h}px). "
+        "El modelo fue entrenado con radiografías de ~900px de ancho — "
+        "los resultados pueden ser poco confiables. "
+        "Se recomienda una resolución mínima de 800px de ancho.",
+        icon="⚠️",
+    )
+    st.stop()
+elif _w < 800:
+    st.warning(
+        f"La imagen tiene {_w}×{_h}px. "
+        "Se recomienda ≥ 800px de ancho para mejores resultados.",
+        icon="⚠️",
+    )
+
+
 # ── Inferencia ────────────────────────────────────────────────────────────────
 
-modo = "SAHI (tiling)" if use_sahi else "Estándar"
-
-with st.spinner(f"Analizando radiografía — modo {modo}…"):
-    img_bgr = preprocess_image(uploaded_file, enhance_contrast=enhance_contrast)
-
-    if use_sahi:
-        detections = run_inference_sahi(sahi_model, img_bgr, conf=conf_thresh, iou=iou_thresh)
-    else:
-        detections = run_inference(model, img_bgr, conf=conf_thresh, iou=iou_thresh)
-
+with st.spinner("Analizando radiografía…"):
+    img_bgr        = preprocess_image(uploaded_file)
+    detections     = run_inference(model, img_bgr, conf=conf_thresh, iou=iou_thresh)
     img_result_bgr = postprocess_results(img_bgr, detections)
     img_result_pil = bgr_to_pil(img_result_bgr)
-    img_orig_pil   = bgr_to_pil(img_bgr)
 
 summary = summarize_detections(detections)
 
@@ -283,50 +240,41 @@ summary = summarize_detections(detections)
 
 st.markdown("### Resultado del análisis")
 
-col1, col2 = st.columns(2)
-col1.metric("🦷 Muelas impactadas", summary["impacted"])
-col2.metric("📐 Modo", modo)
+st.metric("🦷 Muelas impactadas", summary["impacted"])
 
 st.markdown("---")
 
 
-# ── Imágenes ──────────────────────────────────────────────────────────────────
+# ── Imagen resultado ──────────────────────────────────────────────────────────
 
-col_orig, col_res = st.columns(2)
-with col_orig:
-    st.markdown("#### Radiografía original")
-    st.image(img_orig_pil, use_column_width=True)
-with col_res:
-    st.markdown("#### Detecciones")
-    st.image(img_result_pil, use_column_width=True)
+st.markdown("#### Detecciones")
+st.image(img_result_pil, width=None, use_column_width=True)
 
 
-# ── Tabla ─────────────────────────────────────────────────────────────────────
+# ── Tabla colapsable ──────────────────────────────────────────────────────────
 
 if summary["impacted"] > 0:
-    st.markdown("Detalle de detecciones")
-    rows = []
-    for i, det in enumerate(summary["details"], 1):
-        if det.cls_name != "impacted" and det.cls_id != 1:
-            continue
-        w = det.x2 - det.x1
-        h = det.y2 - det.y1
-        rows.append({
-            "#":          i,
-            "Confianza":  f"{det.conf:.1%}",
-            "Posición":   "Superior" if det.y1 < img_bgr.shape[0] // 2 else "Inferior",
-            "Ancho (px)": w,
-            "Alto (px)":  h,
-            "Área (px²)": w * h,
-            "x1": det.x1, "y1": det.y1,
-            "x2": det.x2, "y2": det.y2,
-        })
-    if rows:
-        st.dataframe(rows, use_container_width=True)
+    with st.expander("Ver detalle de detecciones"):
+        rows = []
+        for i, det in enumerate(summary["details"], 1):
+            w = det.x2 - det.x1
+            h = det.y2 - det.y1
+            rows.append({
+                "#":          i,
+                "Confianza":  f"{det.conf:.1%}",
+                "Posición":   "Superior" if det.y1 < img_bgr.shape[0] // 2 else "Inferior",
+                "Ancho (px)": w,
+                "Alto (px)":  h,
+                "Área (px²)": w * h,
+                "x1": det.x1, "y1": det.y1,
+                "x2": det.x2, "y2": det.y2,
+            })
+        if rows:
+            st.dataframe(rows, use_container_width=True)
 else:
     st.warning(
         f"No se detectaron muelas impactadas con conf ≥ {conf_thresh:.0%}. "
-        "Probá bajar el umbral o activar SAHI.",
+        "Probá bajar el umbral de confianza.",
         icon="⚠️",
     )
 
@@ -334,7 +282,7 @@ else:
 # ── Descarga ──────────────────────────────────────────────────────────────────
 
 st.markdown("---")
-col_dl, col_info = st.columns([2, 5])
+col_dl, _ = st.columns([2, 5])
 with col_dl:
     st.download_button(
         label="Descargar resultado",
