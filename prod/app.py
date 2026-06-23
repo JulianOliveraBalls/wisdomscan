@@ -278,8 +278,7 @@ if summary["impacted"] > 0:
             st.dataframe(rows, use_container_width=True)
 else:
     st.warning(
-        f"No se detectaron muelas impactadas con conf ≥ {conf_thresh:.0%}. "
-        "Probá bajar el umbral de confianza.",
+        f"No se detectaron muelas impactadas con conf ≥ {conf_thresh:.0%}. ",
         icon="⚠️",
     )
 
