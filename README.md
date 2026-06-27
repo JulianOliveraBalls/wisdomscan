@@ -64,7 +64,7 @@ El modelo de producción: YOLOv8m fine-tuneado en una cadena de 3 etapas sobre l
 ## Estructura del repositorio
 
 ```
-dentex-wisdom-teeth/
+wisdomscan/
 ├── data/
 │   ├── 01_dataset_preparation.ipynb
 │   ├── test.csv
@@ -100,8 +100,8 @@ dentex-wisdom-teeth/
 
 ```bash
 # 1. Clonar el repositorio
-git clone https://github.com/JulianOliveraBalls/dentex-wisdom-teeth.git
-cd dentex-wisdom-teeth
+git clone https://github.com/JulianOliveraBalls/wisdomscan.git
+cd wisdomscan
 
 # 2. Crear entorno virtual
 python -m venv venv

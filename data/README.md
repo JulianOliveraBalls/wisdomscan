@@ -20,7 +20,7 @@ La descarga está implementada en `data/01_dataset_preparation.ipynb` y se ejecu
 from huggingface_hub import hf_hub_download as hf_dl
 import zipfile, os
 
-DENTEX_DIR = Path('/content/dentex-wisdom-teeth/data/raw/dentex_raw')
+DENTEX_DIR = Path('/content/wisdomscan/data/raw/dentex_raw')
 
 for fname, cname in [('DENTEX/training_data.zip',   'training_data'),
                       ('DENTEX/validation_data.zip', 'validation_data')]:
