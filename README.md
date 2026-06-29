@@ -31,8 +31,6 @@ El modelo de producción: YOLOv8m fine-tuneado en una cadena de 3 etapas sobre l
 
 - Detección de muelas impactadas con bounding boxes sobre la radiografía
 - Tabla de detecciones con confianza, posición (superior/inferior) y dimensiones
-- Modo SAHI (tiling) para radiografías de alta resolución
-- CLAHE para normalización de contraste en imágenes oscuras
 - Descarga del resultado anotado
 
 ---
