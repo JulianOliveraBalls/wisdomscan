@@ -128,33 +128,14 @@ with st.sidebar:
         "Umbral de confianza",
         min_value=0.10, max_value=0.90,
         value=CONF_DEFAULT, step=0.05,
-        help="Confianza mínima para reportar una detección. Default: 0.15",
+        help="Confianza mínima para reportar una detección.",
     )
     iou_thresh = st.slider(
         "Umbral IoU (NMS)",
         min_value=0.10, max_value=0.90,
         value=IOU_DEFAULT, step=0.05,
-        help="Supresión no máxima — elimina detecciones solapadas.",
+        help="Supresión no máxima — elimina boxes solapadas.",
     )
-
-    st.markdown("---")
-    st.markdown("### Modelo")
-    st.markdown("""
-| Campo | Valor |
-|-------|-------|
-| Experimento | Exp_G8b |
-| Arquitectura | YOLOv8m |
-| Backbone | COCO pretrain |
-| Dataset | DENTEX + ExAn-MTM |
-| Clase detectada | `impacted` |
-| mAP50 (test) | **0.992** |
-| Precisión | 0.980 |
-| Recall | 0.999 |
-""")
-
-    st.markdown("---")
-    st.caption("Redes Neuronales · UTN FRM")
-    st.caption("Docente: Ing. Pablo Marinozi")
 
 
 # ── Modelo ────────────────────────────────────────────────────────────────────
