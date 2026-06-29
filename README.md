@@ -37,21 +37,6 @@ El modelo de producción: YOLOv8m fine-tuneado en una cadena de 3 etapas sobre l
 
 ---
 
-## Integrantes
-
-| Nombre |
-|--------|
-| Anselmi, Matías |
-| De Coninck, Ramiro |
-| Eraso, Leandro |
-| Mazurán, Clara |
-| Olivera Balls, Julián |
-
-**Materia:** Redes Neuronales — UTN Facultad Regional Mendoza  
-**Docente:** Ing. Pablo Marinozi
-
----
-
 ## Datasets
 
 | Dataset | Fuente | Licencia |
