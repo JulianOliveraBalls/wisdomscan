@@ -4,7 +4,7 @@
 
 # WisdomScan
 
-Detección automática de muelas del juicio impactadas en radiografías panorámicas dentales, usando YOLOv8m fine-tuneado sobre el dataset DENTEX MICCAI 2023.
+Detección automática de muelas del juicio impactadas en radiografías panorámicas dentales, usando YOLOv8m fine-tuneado sobre el dataset DENTEX MICCAI 2023 y ExAn-MTM (Expert-Annotated Mandibular Third Molar)
 
 **🔗 App desplegada:** https://wisdomscan.streamlit.app/
 
@@ -31,24 +31,7 @@ El modelo de producción: YOLOv8m fine-tuneado en una cadena de 3 etapas sobre l
 
 - Detección de muelas impactadas con bounding boxes sobre la radiografía
 - Tabla de detecciones con confianza, posición (superior/inferior) y dimensiones
-- Modo SAHI (tiling) para radiografías de alta resolución
-- CLAHE para normalización de contraste en imágenes oscuras
 - Descarga del resultado anotado
-
----
-
-## Integrantes
-
-| Nombre |
-|--------|
-| Anselmi, Matías |
-| De Coninck, Ramiro |
-| Eraso, Leandro |
-| Mazurán, Clara |
-| Olivera Balls, Julián |
-
-**Materia:** Redes Neuronales — UTN Facultad Regional Mendoza  
-**Docente:** Ing. Pablo Marinozi
 
 ---
 
